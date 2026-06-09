@@ -3,6 +3,7 @@
 > Пълна релационна схема на MySQL/MariaDB базата.
 > Database name: `manifesto` · Engine: InnoDB · Charset: utf8mb4 · Collation: utf8mb4_unicode_ci
 > Версия: 1.1 · Дата: 2026-05-14
+> ⚠️ **D-10 (2026-06-09): SCOPE РЕДУЦИРАН до 9 таблици:** `app_user`, `docker_host`, `project`, `service`, `port_mapping`, `env_var`, `volume`, `web_app`, `generated_file`. Игнорирай секциите за: hardware_host, hypervisor, virtual_machine, infrastructure_role, infrastructure_user, network, service_network, health_check (stretch). **`docker_host` губи XOR FK** — става самостоятелна таблица с колони name, ip_address, os, docker_version, notes. Виж `DECISIONS.md` D-10.
 
 ---
 

@@ -1,0 +1,28 @@
+# PHP / Composer
+/vendor/
+composer.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Generated output
+/storage/logs/*
+/storage/generated/*
+!/storage/logs/.gitkeep
+!/storage/generated/.gitkeep
+
+# Claude Code local settings (PROGRESS.md се commit-ва, това НЕ)
+.claude/settings.local.json
+
+# OS / IDE
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# XAMPP / Apache
+*.log

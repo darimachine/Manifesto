@@ -124,6 +124,24 @@
 
 ---
 
+## D-10 — Scope редукция: 1 седмица, смалена йерархия
+
+**Дата:** 2026-06-09
+**Context:** Реалното оставащо време е ~1 седмица („да го подкарам и нещо да работи"). Пълната йерархия от 10 entities (D-02) е непосилна за този срок.
+**Options:** A) Смали йерархията, запази генераторите · B) Пази йерархията, режи генераторите · C) Режи и двете
+**Decision:** A — смалена йерархия, генераторите остават (те са ефектната част на защитата).
+**Consequences:**
+- **Изрязани entities:** HardwareHost, Hypervisor, VirtualMachine, InfrastructureRole, InfrastructureUser, Network, ServiceNetwork.
+- **DockerHost става самостоятелен** (name, ip, os, docker_version) — **XOR FK constraint-ът отпада** (заменя D-02 в тази част).
+- **Остават 9 таблици:** app_user, docker_host, project, service, port_mapping, env_var, volume, web_app, generated_file.
+- **Генератори:** docker-compose.yml + .env (MUST), Emmet export (SHOULD). Dockerfile/vhost/README — изрязани.
+- **Изрязани функции:** JSON import/export, Network management. Health check, ZIP, version history → stretch goals.
+- Compose файловете ползват default network (без custom networks).
+- `DATABASE_SCHEMA.md` и `ARCHITECTURE.md` се четат ПРЕЗ призмата на D-10 — секциите за изрязаните entities се игнорират.
+- На защита: „фокусирах scope-а върху Docker слоя — сърцето на заданието; HW/VM нивата са описателни метаданни, оставени като future work."
+
+---
+
 ## Шаблон за бъдещи решения
 
 ```markdown

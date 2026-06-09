@@ -1,0 +1,7 @@
+# Manifesto — front controller rewrite.
+# Relative rules only (no RewriteBase) so it works from any subfolder.
+Options -Indexes
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]

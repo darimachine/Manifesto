@@ -1,0 +1,7 @@
+# Manifesto — root forwarder.
+# Lets the app live in ANY subfolder (e.g. htdocs/w26/manifesto-xxx/)
+# by transparently serving everything from public/.
+Options -Indexes
+RewriteEngine On
+RewriteRule ^$ public/ [L]
+RewriteRule (.*) public/$1 [L]

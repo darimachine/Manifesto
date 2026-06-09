@@ -1,0 +1,16 @@
+{
+    "name": "manifesto/manifesto",
+    "description": "Declare your infrastructure. Generate your stack.",
+    "type": "project",
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Manifesto\\": "src/"
+        },
+        "files": [
+            "src/Core/helpers.php"
+        ]
+    }
+}

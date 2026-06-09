@@ -2,6 +2,7 @@
 
 > Структура на кода, слоеве, отговорности, граници.
 > Версия: 1.1 · Дата: 2026-05-14
+> ⚠️ **D-10 (2026-06-09): SCOPE РЕДУЦИРАН.** Игнорирай всичко за: HardwareHost, Hypervisor, VirtualMachine, InfrastructureRole, InfrastructureUser, Network/ServiceNetwork, Dockerfile/Vhost/Readme генератори, JsonImporter/JsonExporter. DockerHost е самостоятелен entity без XOR FK. Слоевете, request flow, Core класовете и инвариантите остават валидни. Виж `DECISIONS.md` D-10 и `TODO.md` v2.0.
 
 ---
 
