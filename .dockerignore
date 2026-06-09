@@ -1,0 +1,34 @@
+# --- Version control ---
+.git
+.gitignore
+
+# --- Secrets (never bake into the image) ---
+.env
+.env.local
+.env.*.local
+
+# --- Documentation (internal, not needed at runtime) ---
+docs/
+docs-old/
+*.md
+README.md
+CLAUDE.md
+
+# --- Claude Code session state ---
+.claude/
+
+# --- Generated output (mounted as a volume at runtime) ---
+storage/logs/*
+storage/generated/*
+
+# --- Dependency caches (rebuilt inside the image) ---
+vendor/
+node_modules/
+
+# --- OS and editor noise ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

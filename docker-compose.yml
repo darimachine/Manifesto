@@ -1,0 +1,65 @@
+# Manifesto — local Docker stack.
+#
+# Quick start:
+#   cp .env.example .env          # only needed if you want non-default ports/passwords
+#   docker compose up -d
+#   open http://localhost:8080
+#
+# The MariaDB instance auto-initialises with schema.sql + seed.sql on first run.
+# Re-seed from scratch: docker compose down -v && docker compose up -d
+#
+# DB direct access (DBeaver / phpMyAdmin / mysql CLI):
+#   host=127.0.0.1  port=${DB_EXPOSED_PORT:-33060}  user=root  pass=${DB_ROOT_PASSWORD:-manifesto_root}
+
+services:
+
+  # ── PHP / Apache application ────────────────────────────────────────────────
+  app:
+    build: .
+    container_name: manifesto-app
+    restart: unless-stopped
+    ports:
+      - "${APP_HTTP_PORT:-8080}:80"
+    environment:
+      # Override DB_HOST to the compose service name so PDO reaches the db container.
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-manifesto}
+      DB_USER: ${DB_USER:-root}
+      DB_PASS: ${DB_ROOT_PASSWORD:-manifesto_root}
+      APP_DEBUG: ${APP_DEBUG:-1}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Mount storage so generated files and logs survive container restarts/rebuilds.
+      - ./storage:/var/www/html/storage
+
+  # ── MariaDB database ────────────────────────────────────────────────────────
+  db:
+    image: mariadb:10.11
+    container_name: manifesto-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-manifesto_root}
+      MARIADB_DATABASE: ${DB_NAME:-manifesto}
+      MARIADB_CHARSET: utf8mb4
+      MARIADB_COLLATE: utf8mb4_unicode_ci
+    ports:
+      # Exposed so you can connect from the host with any SQL client.
+      # Not required by the app — the app reaches db via the internal network.
+      - "${DB_EXPOSED_PORT:-33060}:3306"
+    volumes:
+      # Named volume keeps your data between `docker compose stop` cycles.
+      - manifesto-dbdata:/var/lib/mysql
+      # SQL files are loaded in alphabetical order on first initialisation only.
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  manifesto-dbdata:
