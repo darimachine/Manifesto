@@ -14,6 +14,11 @@ final class WebApp
         public ?string $publicUrl,
         public ?string $dnsName,
         public ?string $notes,
+        public string $status,
+        public ?string $lastStatusChange,
+        public ?string $lastCheckedAt,
+        public ?int $lastHttpCode,
+        public ?int $lastDurationMs,
     ) {
     }
 
@@ -26,6 +31,11 @@ final class WebApp
             $row['public_url'],
             $row['dns_name'],
             $row['notes'],
+            $row['status'] ?? 'unknown',
+            $row['last_status_change'] ?? null,
+            $row['last_checked_at'] ?? null,
+            isset($row['last_http_code']) && $row['last_http_code'] !== null ? (int) $row['last_http_code'] : null,
+            isset($row['last_duration_ms']) && $row['last_duration_ms'] !== null ? (int) $row['last_duration_ms'] : null,
         );
     }
 }

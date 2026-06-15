@@ -11,8 +11,11 @@ $tree = $sidebarTree ?? [];
     </a>
 
     <nav class="sidebar-nav">
-        <a href="<?= url('/docker-hosts') ?>">Docker Hosts</a>
-        <a href="<?= url('/projects') ?>">Projects</a>
+        <a href="<?= url('/docker-hosts') ?>">🖥 Docker Hosts</a>
+        <a href="<?= url('/projects') ?>">📦 Projects</a>
+        <?php if (($currentUser['role'] ?? '') === 'admin'): ?>
+            <a href="<?= url('/projects/import') ?>" style="font-size:.85rem;opacity:.85;">⬆ Import JSON</a>
+        <?php endif; ?>
     </nav>
 
     <div class="sidebar-tree">

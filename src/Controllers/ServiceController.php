@@ -143,7 +143,7 @@ final class ServiceController
         Response::redirect('/projects/' . $service->projectId);
     }
 
-    /** @return array{name:string,image:string,restart_policy:string,notes:?string} */
+    /** @return array{name:string,image:string,restart_policy:string,notes:?string,command:?string,working_dir:?string,depends_on:?string,build_context:?string,dockerfile_content:?string,healthcheck_cmd:?string,healthcheck_interval:?string,network_mode:?string} */
     private function serviceInput(Request $request): array
     {
         $restartPolicy = $request->input('restart_policy', 'unless-stopped') ?? 'unless-stopped';
@@ -152,11 +152,32 @@ final class ServiceController
         }
         $notes = $request->input('notes', '') ?? '';
 
+        // Advanced fields
+        $command           = $request->input('command', '') ?? '';
+        $workingDir        = $request->input('working_dir', '') ?? '';
+        $dependsOn         = $request->input('depends_on', '') ?? '';
+        $buildContext      = $request->input('build_context', '') ?? '';
+        $dockerfileContent = $request->raw('dockerfile_content') ?? '';
+        if (!is_string($dockerfileContent)) {
+            $dockerfileContent = '';
+        }
+        $healthcheckCmd      = $request->input('healthcheck_cmd', '') ?? '';
+        $healthcheckInterval = $request->input('healthcheck_interval', '30s') ?? '30s';
+        $networkMode         = $request->input('network_mode', '') ?? '';
+
         return [
-            'name'           => $request->input('name', '') ?? '',
-            'image'          => $request->input('image', '') ?? '',
-            'restart_policy' => $restartPolicy,
-            'notes'          => $notes === '' ? null : $notes,
+            'name'                => $request->input('name', '') ?? '',
+            'image'               => $request->input('image', '') ?? '',
+            'restart_policy'      => $restartPolicy,
+            'notes'               => $notes === '' ? null : $notes,
+            'command'             => $command === '' ? null : $command,
+            'working_dir'         => $workingDir === '' ? null : $workingDir,
+            'depends_on'          => $dependsOn === '' ? null : $dependsOn,
+            'build_context'       => $buildContext === '' ? null : $buildContext,
+            'dockerfile_content'  => trim($dockerfileContent) === '' ? null : $dockerfileContent,
+            'healthcheck_cmd'     => $healthcheckCmd === '' ? null : $healthcheckCmd,
+            'healthcheck_interval' => $healthcheckInterval === '' ? null : $healthcheckInterval,
+            'network_mode'        => $networkMode === '' ? null : $networkMode,
         ];
     }
 

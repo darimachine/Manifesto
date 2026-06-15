@@ -9,6 +9,7 @@ use Manifesto\Models\PortMapping;
 use Manifesto\Models\Volume;
 use Manifesto\Repositories\ProjectRepository;
 use Manifesto\Repositories\ServiceChildrenRepository;
+use Manifesto\Repositories\ServiceRepository;
 
 /**
  * Generates a Docker Compose v3.8 YAML string from the project hierarchy stored in
@@ -18,11 +19,16 @@ use Manifesto\Repositories\ServiceChildrenRepository;
  *   version: "3.8"
  *   services:
  *     <name>:
- *       image: <image>
+ *       image: <image>  (or build: when build_context is set)
  *       restart: <policy>
+ *       command: <cmd>  (omitted when null)
+ *       working_dir: <dir>  (omitted when null)
+ *       network_mode: <mode>  (omitted when null)
+ *       depends_on:  (omitted when null)
  *       ports:   (omitted when empty)
  *       environment:  (omitted when empty)
  *       volumes:  (omitted when empty)
+ *       healthcheck:  (omitted when null)
  *
  * String values that contain ':', '#', single-quote, or leading/trailing
  * whitespace are double-quoted. Null env-var values are emitted as bare keys.
@@ -33,6 +39,7 @@ final class DockerComposeGenerator
     public function __construct(
         private ProjectRepository $projects,
         private ServiceChildrenRepository $children,
+        private ServiceRepository $services,
     ) {
     }
 
@@ -58,6 +65,17 @@ final class DockerComposeGenerator
             $image         = (string) $row['image'];
             $restartPolicy = (string) $row['restart_policy'];
 
+            // Fetch full service model for extended fields (Group 1 adds these columns).
+            $service = $this->services->find($serviceId);
+
+            $buildContext       = $service !== null ? ($service->buildContext ?? null) : null;
+            $command            = $service !== null ? ($service->command ?? null) : null;
+            $workingDir         = $service !== null ? ($service->workingDir ?? null) : null;
+            $dependsOn          = $service !== null ? ($service->dependsOn ?? null) : null;
+            $healthcheckCmd     = $service !== null ? ($service->healthcheckCmd ?? null) : null;
+            $healthcheckInterval = $service !== null ? ($service->healthcheckInterval ?? null) : null;
+            $networkMode        = $service !== null ? ($service->networkMode ?? null) : null;
+
             $this->assertValidServiceName($serviceName);
 
             $ports   = $this->children->portsOf($serviceId);
@@ -65,9 +83,45 @@ final class DockerComposeGenerator
             $volumes = $this->children->volumesOf($serviceId);
 
             $lines[] = '  ' . $serviceName . ':';
-            $lines[] = '    image: ' . $this->yamlScalar($image);
+
+            // 1. image / build
+            if (!empty($buildContext)) {
+                $lines[] = '    build:';
+                $lines[] = '      context: ' . $this->yamlScalar($buildContext);
+                $lines[] = '      dockerfile: Dockerfile';
+                // Also emit image for `docker compose build` tagging.
+                $lines[] = '    image: ' . $this->yamlScalar($image);
+            } else {
+                $lines[] = '    image: ' . $this->yamlScalar($image);
+            }
+
+            // 2. restart
             $lines[] = '    restart: ' . $this->yamlScalar($restartPolicy);
 
+            // 3. command
+            if (!empty($command)) {
+                $lines[] = '    command: ' . $this->yamlScalar((string) $command);
+            }
+
+            // 4. working_dir
+            if (!empty($workingDir)) {
+                $lines[] = '    working_dir: ' . $this->yamlScalar((string) $workingDir);
+            }
+
+            // 5. network_mode
+            if (!empty($networkMode)) {
+                $lines[] = '    network_mode: ' . $this->yamlScalar((string) $networkMode);
+            }
+
+            // 6. depends_on (comma-separated string → YAML list)
+            if (!empty($dependsOn)) {
+                $lines[] = '    depends_on:';
+                foreach (array_filter(array_map('trim', explode(',', (string) $dependsOn))) as $dep) {
+                    $lines[] = '      - ' . $this->yamlScalar($dep);
+                }
+            }
+
+            // 7. ports
             if ($ports !== []) {
                 $lines[] = '    ports:';
                 foreach ($ports as $port) {
@@ -75,6 +129,7 @@ final class DockerComposeGenerator
                 }
             }
 
+            // 8. environment
             if ($envVars !== []) {
                 $lines[] = '    environment:';
                 foreach ($envVars as $env) {
@@ -82,11 +137,22 @@ final class DockerComposeGenerator
                 }
             }
 
+            // 9. volumes
             if ($volumes !== []) {
                 $lines[] = '    volumes:';
                 foreach ($volumes as $volume) {
                     $lines[] = '      - ' . $this->yamlScalar($this->formatVolume($volume));
                 }
+            }
+
+            // 10. healthcheck
+            if (!empty($healthcheckCmd)) {
+                $interval = (!empty($healthcheckInterval)) ? (string) $healthcheckInterval : '30s';
+                $lines[] = '    healthcheck:';
+                $lines[] = '      test: ["CMD-SHELL", ' . $this->yamlScalar((string) $healthcheckCmd) . ']';
+                $lines[] = '      interval: ' . $interval;
+                $lines[] = '      timeout: 5s';
+                $lines[] = '      retries: 3';
             }
         }
 

@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 use Manifesto\Core\EnvLoader;
 
-/**
- * THE single application config. Values come from .env (XAMPP)
- * or real environment variables (Docker) — never hardcode here.
- */
+
 return [
     'app' => [
         'name'  => 'Manifesto',

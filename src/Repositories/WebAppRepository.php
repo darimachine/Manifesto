@@ -12,7 +12,8 @@ final class WebAppRepository
     public function find(int $id): ?WebApp
     {
         $stmt = Database::pdo()->prepare(
-            'SELECT id, service_id, name, public_url, dns_name, notes
+            'SELECT id, service_id, name, public_url, dns_name, notes,
+                    status, last_status_change, last_checked_at, last_http_code, last_duration_ms
              FROM web_app WHERE id = :id LIMIT 1'
         );
         $stmt->execute(['id' => $id]);
@@ -29,7 +30,8 @@ final class WebAppRepository
     {
         $stmt = Database::pdo()->prepare(
             'SELECT w.id, w.service_id, w.name, w.public_url, w.dns_name,
-                    w.notes, w.created_at, w.updated_at,
+                    w.notes, w.status, w.last_status_change, w.last_checked_at,
+                    w.last_http_code, w.last_duration_ms, w.created_at, w.updated_at,
                     s.name AS service_name,
                     p.id   AS project_id, p.name AS project_name
              FROM web_app w
@@ -100,5 +102,31 @@ final class WebAppRepository
         $stmt->execute(['id' => $serviceId]);
         $row = $stmt->fetch();
         return $row === false ? null : $row;
+    }
+
+    /**
+     * Update the health-check status for a web app.
+     *
+     * last_status_change is only updated when the status actually changes
+     * (i.e. the new status differs from the previous one).
+     */
+    public function updateStatus(int $id, string $status, int $httpCode, int $durationMs, ?string $previousStatus): bool
+    {
+        $stmt = Database::pdo()->prepare(
+            'UPDATE web_app
+             SET status           = :status,
+                 last_http_code   = :http_code,
+                 last_duration_ms = :duration_ms,
+                 last_checked_at  = NOW(),
+                 last_status_change = IF(status != :previous_status, NOW(), last_status_change)
+             WHERE id = :id'
+        );
+        return $stmt->execute([
+            'id'              => $id,
+            'status'          => $status,
+            'http_code'       => $httpCode,
+            'duration_ms'     => $durationMs,
+            'previous_status' => $previousStatus ?? $status,
+        ]);
     }
 }

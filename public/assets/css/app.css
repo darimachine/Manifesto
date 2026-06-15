@@ -247,6 +247,88 @@ table.table {
 .auth-logo .brand-mark { width: 44px; height: 44px; font-size: 1.4rem; border-radius: 10px; }
 .auth-tagline { color: var(--c-muted); font-size: .85rem; margin: .25rem 0 0; }
 
+/* ---------- IDE-like sidebar tree ---------- */
+.sidebar-tree details {
+    position: relative;
+}
+.sidebar-tree .tree-indent {
+    margin-left: 1rem;
+    padding-left: .5rem;
+    border-left: 1px dotted rgba(255,255,255,.15);
+}
+.sidebar-tree summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: .15rem 0;
+    border-radius: 4px;
+    transition: background .15s ease;
+}
+.sidebar-tree summary:hover {
+    background: rgba(255,255,255,.05);
+}
+.sidebar-tree summary::-webkit-details-marker {
+    display: none;
+}
+.sidebar-tree summary::before {
+    content: "▶";
+    font-size: .65rem;
+    color: rgba(255,255,255,.4);
+    width: 14px;
+    transition: transform .15s ease;
+    display: inline-block;
+}
+.sidebar-tree details[open] > summary::before {
+    transform: rotate(90deg);
+}
+.sidebar-tree .tree-link {
+    flex: 1;
+}
+.sidebar-tree a.tree-webapp {
+    padding-left: 1.5rem;
+    display: block;
+    border-left: 1px dotted rgba(255,255,255,.15);
+    margin-left: 1rem;
+    border-radius: 4px;
+    transition: background .15s ease;
+}
+.sidebar-tree a.tree-webapp:hover {
+    background: rgba(255,255,255,.05);
+}
+
+/* ---------- Status badges (web apps) ---------- */
+.status-badge {
+    display: inline-block;
+    padding: .2rem .55rem;
+    border-radius: 99px;
+    font-size: .8rem;
+    font-weight: 600;
+}
+.status-up { background: #ecfdf5; color: var(--c-success); border: 1px solid #a7f3d0; }
+.status-down { background: #fef2f2; color: var(--c-danger); border: 1px solid #fecaca; }
+.status-error { background: #fef3c7; color: var(--c-warning); border: 1px solid #fde68a; }
+.status-unknown { background: #e5e7eb; color: var(--c-muted); border: 1px solid #d1d5db; }
+
+/* ---------- Details/summary collapsible ---------- */
+details > summary {
+    list-style: none;
+    cursor: pointer;
+}
+details > summary::-webkit-details-marker {
+    display: none;
+}
+details > summary.card-title::before {
+    content: "▶ ";
+    font-size: .8rem;
+    transition: transform .15s ease;
+    display: inline-block;
+    margin-right: .25rem;
+}
+details[open] > summary.card-title::before {
+    transform: rotate(90deg);
+}
+
 /* ---------- Error pages ---------- */
 .error-page { text-align: center; padding: 3rem 1rem; background: var(--c-surface); border-radius: 12px; }
 .error-code { font-size: 4rem; font-weight: 800; color: var(--c-primary); line-height: 1; }

@@ -6,6 +6,82 @@
 
 ---
 
+## 0. ER диаграма на базата данни
+
+Следната диаграма показва йерархията на 9-те таблици и техните връзки:
+
+```mermaid
+erDiagram
+    docker_host ||--o{ project : "hosts"
+    project ||--o{ service : "contains"
+    project ||--o{ generated_file : "has versions"
+    service ||--o{ port_mapping : "exposes"
+    service ||--o{ env_var : "configures"
+    service ||--o{ volume : "mounts"
+    service ||--o{ web_app : "publishes"
+    app_user {
+        INT id PK
+        VARCHAR username UK
+        VARCHAR password_hash
+        ENUM role
+    }
+    docker_host {
+        INT id PK
+        VARCHAR name
+        VARCHAR ip_address
+        VARCHAR docker_version
+    }
+    project {
+        INT id PK
+        INT docker_host_id FK
+        VARCHAR name
+        VARCHAR slug UK
+    }
+    service {
+        INT id PK
+        INT project_id FK
+        VARCHAR name
+        VARCHAR image
+        ENUM restart_policy
+    }
+    port_mapping {
+        INT id PK
+        INT service_id FK
+        INT host_port
+        INT container_port
+        ENUM protocol
+    }
+    env_var {
+        INT id PK
+        INT service_id FK
+        VARCHAR key_name
+        TEXT value
+        BOOL is_secret
+    }
+    volume {
+        INT id PK
+        INT service_id FK
+        VARCHAR host_path
+        VARCHAR container_path
+        ENUM mode
+    }
+    web_app {
+        INT id PK
+        INT service_id FK
+        VARCHAR name
+        VARCHAR public_url
+    }
+    generated_file {
+        INT id PK
+        INT project_id FK
+        ENUM file_type
+        INT version_number
+        LONGTEXT content
+    }
+```
+
+---
+
 ## 1. Login страница
 
 При първо отваряне на `http://localhost/manifesto/` се прави автоматичен redirect към `/login`.

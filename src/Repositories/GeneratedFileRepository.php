@@ -120,4 +120,32 @@ final class GeneratedFileRepository
 
         return $version;
     }
+
+    /**
+     * Insert one dockerfile row per service into a new version batch.
+     *
+     * Each row prefixes the content with a comment identifying the service:
+     *   # Service: <serviceName>
+     *
+     * The version number used is the next version across all types for the project.
+     *
+     * @param array<string,string> $contentByServiceName  Keys are service names, values are Dockerfile content.
+     */
+    public function insertDockerfilesForProject(int $projectId, int $versionNumber, array $contentByServiceName): void
+    {
+        $pdo  = Database::pdo();
+        $stmt = $pdo->prepare(
+            'INSERT INTO generated_file (project_id, file_type, version_number, content)
+             VALUES (:project_id, \'dockerfile\', :version_number, :content)'
+        );
+
+        foreach ($contentByServiceName as $serviceName => $content) {
+            $prefixed = '# Service: ' . $serviceName . "\n\n" . $content;
+            $stmt->execute([
+                'project_id'     => $projectId,
+                'version_number' => $versionNumber,
+                'content'        => $prefixed,
+            ]);
+        }
+    }
 }

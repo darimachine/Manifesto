@@ -67,6 +67,12 @@ final class GenerationController
             'emmet'          => $emmet,
         ]);
 
+        $dockerfileGen = new \Manifesto\Services\DockerfileGenerator($this->projects, new \Manifesto\Repositories\ServiceRepository());
+        $dockerfiles = $dockerfileGen->generateForProject($projectId);
+        if ($dockerfiles !== []) {
+            $this->files->insertDockerfilesForProject($projectId, $version, $dockerfiles);
+        }
+
         Session::flash('success', 'Generated v' . $version . ' of docker-compose.yml, .env and Emmet export.');
         Response::redirect('/projects/' . $projectId . '/files');
     }
@@ -132,5 +138,80 @@ final class GenerationController
         }
 
         Response::download($file->content, $file->filename(), $file->mimeType());
+    }
+
+    /**
+     * GET /projects/{id}/export
+     * Exports a project as a JSON file download.
+     */
+    public function exportJson(Request $request, string $id): void
+    {
+        $projectId = (int) $id;
+        $project = $this->projects->findWithHost($projectId);
+        if ($project === null) {
+            Response::abort(404, 'Project not found.');
+        }
+
+        $hosts    = new \Manifesto\Repositories\DockerHostRepository();
+        $services = new \Manifesto\Repositories\ServiceRepository();
+        $children = new \Manifesto\Repositories\ServiceChildrenRepository();
+        $exporter = new \Manifesto\Services\JsonExporter($hosts, $this->projects, $services, $children);
+
+        try {
+            $data = $exporter->exportProject($projectId);
+        } catch (\Throwable $e) {
+            Session::flash('error', 'Export failed: ' . $e->getMessage());
+            Response::redirect('/projects/' . $projectId);
+        }
+
+        $json     = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $filename = $project['slug'] . '.manifesto.json';
+        Response::download($json, $filename, 'application/json');
+    }
+
+    /**
+     * GET /projects/import
+     * Shows the JSON import form.
+     */
+    public function importForm(Request $request): void
+    {
+        Response::view('projects/import', [
+            'title' => 'Import Project from JSON',
+        ]);
+    }
+
+    /**
+     * POST /projects/import
+     * Processes the uploaded JSON file and imports a project.
+     */
+    public function importJson(Request $request): void
+    {
+        $upload = $_FILES['json_file'] ?? null;
+        if (!is_array($upload) || $upload['error'] !== UPLOAD_ERR_OK) {
+            Session::flash('error', 'Please select a valid JSON file.');
+            Response::redirect('/projects/import');
+        }
+
+        $content = file_get_contents($upload['tmp_name']);
+        $data    = json_decode($content, true);
+        if (!is_array($data)) {
+            Session::flash('error', 'File is not valid JSON.');
+            Response::redirect('/projects/import');
+        }
+
+        $hosts    = new \Manifesto\Repositories\DockerHostRepository();
+        $services = new \Manifesto\Repositories\ServiceRepository();
+        $children = new \Manifesto\Repositories\ServiceChildrenRepository();
+        $importer = new \Manifesto\Services\JsonImporter($hosts, $this->projects, $services, $children);
+
+        try {
+            $newProjectId = $importer->importProject($data);
+        } catch (\Throwable $e) {
+            Session::flash('error', $e->getMessage());
+            Response::redirect('/projects/import');
+        }
+
+        Session::flash('success', 'Project imported successfully.');
+        Response::redirect('/projects/' . $newProjectId);
     }
 }

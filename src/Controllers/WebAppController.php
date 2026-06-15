@@ -91,6 +91,44 @@ final class WebAppController
     }
 
     /**
+     * POST /webapps/{id}/check
+     * Performs an HTTP health check and updates the stored status.
+     */
+    public function check(Request $request, string $id): void
+    {
+        $webAppId = (int) $id;
+        $webApp   = $this->webApps->find($webAppId);
+        if ($webApp === null) {
+            Response::abort(404, 'Web app not found.');
+        }
+
+        if ($webApp->publicUrl === null || $webApp->publicUrl === '') {
+            Session::flash('error', 'Web app has no public URL configured.');
+            Response::redirect('/webapps/' . $webAppId);
+        }
+
+        $checker = new \Manifesto\Services\HealthChecker();
+        $result  = $checker->check($webApp->publicUrl, 5);
+
+        $this->webApps->updateStatus(
+            $webAppId,
+            $result['status'],
+            $result['http_code'],
+            $result['duration_ms'],
+            $webApp->status ?? 'unknown'
+        );
+
+        if ($result['status'] === 'up') {
+            Session::flash('success', "Status: UP ({$result['http_code']} in {$result['duration_ms']}ms)");
+        } else {
+            $errorMsg = $result['error'] ?? 'No response';
+            Session::flash('error', "Status: {$result['status']} — {$errorMsg}");
+        }
+
+        Response::redirect('/webapps/' . $webAppId);
+    }
+
+    /**
      * Validate form input; on failure flash errors + old input and
      * redirect back to $backTo (never returns in that case).
      *

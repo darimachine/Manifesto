@@ -94,6 +94,26 @@ $nextVersion = $maxVersion + 1;
     <?php endif; ?>
 </div>
 
+<?php
+// Filter dockerfiles from history
+$dockerfiles = array_filter($history, fn($f) => $f->fileType === 'dockerfile');
+?>
+
+<?php if ($dockerfiles !== []): ?>
+<div class="card">
+    <h2 class="card-title">Generated Dockerfiles</h2>
+    <?php foreach ($dockerfiles as $df): ?>
+        <details style="margin-bottom:1rem;">
+            <summary style="cursor:pointer;font-weight:600;">
+                📄 v<?= (int) $df->versionNumber ?>
+                <a href="<?= url('/files/' . $df->id . '/download') ?>" class="btn btn-ghost btn-sm" style="float:right;">Download</a>
+            </summary>
+            <pre class="code-preview" style="margin-top:.75rem;"><?= e($df->content) ?></pre>
+        </details>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
+
 <div class="card">
     <h2 class="card-title">Generation history</h2>
     <?php if ($history === []): ?>

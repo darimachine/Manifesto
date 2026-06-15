@@ -35,6 +35,7 @@ final class GeneratedFile
         return match ($this->fileType) {
             'docker-compose' => 'docker-compose.yml',
             'env'            => '.env',
+            'dockerfile'     => 'Dockerfile',
             default          => 'emmet.txt',
         };
     }

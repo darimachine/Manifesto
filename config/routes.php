@@ -10,11 +10,7 @@ use Manifesto\Controllers\ProjectController;
 use Manifesto\Controllers\ServiceController;
 use Manifesto\Controllers\WebAppController;
 
-/**
- * [METHOD, pattern, Controller, action, access]
- * access: 'guest' | 'auth' (default) | 'admin'
- * All mutations (POST) that change data are 'admin' — enforced by the Router.
- */
+
 return [
     // Auth
     ['GET',  '/login',  AuthController::class, 'showLogin', 'guest'],
@@ -37,6 +33,9 @@ return [
     ['GET',  '/projects',             ProjectController::class, 'index',  'auth'],
     ['GET',  '/projects/create',      ProjectController::class, 'create', 'admin'],
     ['POST', '/projects',             ProjectController::class, 'store',  'admin'],
+    // JSON import — must be BEFORE /projects/{id} to avoid routing "import" as an ID
+    ['GET',  '/projects/import',      GenerationController::class, 'importForm', 'admin'],
+    ['POST', '/projects/import',      GenerationController::class, 'importJson', 'admin'],
     ['GET',  '/projects/{id}',        ProjectController::class, 'show',   'auth'],
     ['GET',  '/projects/{id}/edit',   ProjectController::class, 'edit',   'admin'],
     ['POST', '/projects/{id}',        ProjectController::class, 'update', 'admin'],
@@ -57,10 +56,12 @@ return [
     ['GET',  '/webapps/{id}/edit',   WebAppController::class, 'edit',    'admin'],
     ['POST', '/webapps/{id}',        WebAppController::class, 'update',  'admin'],
     ['POST', '/webapps/{id}/delete', WebAppController::class, 'destroy', 'admin'],
+    ['POST', '/webapps/{id}/check',  WebAppController::class, 'check',   'auth'],
 
     // Generation
     ['POST', '/projects/{id}/generate',       GenerationController::class, 'generate', 'admin'],
     ['GET',  '/projects/{id}/files',          GenerationController::class, 'files',    'auth'],
     ['GET',  '/projects/{id}/emmet',          GenerationController::class, 'emmet',    'auth'],
+    ['GET',  '/projects/{id}/export',         GenerationController::class, 'exportJson', 'auth'],
     ['GET',  '/files/{id}/download',          GenerationController::class, 'download', 'auth'],
 ];

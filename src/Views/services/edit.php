@@ -51,6 +51,61 @@ $isAdmin = ($currentUser['role'] ?? '') === 'admin';
     </div>
 
     <div class="card">
+        <details>
+            <summary class="card-title" style="cursor:pointer;">⚙ Advanced docker-compose settings (optional)</summary>
+            <div style="margin-top:1rem;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="command">command</label>
+                        <input type="text" id="command" name="command" value="<?= e(old('command', $service['command'] ?? '')) ?>" placeholder="nginx -g 'daemon off;'">
+                        <p class="field-hint">Override container CMD</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="working_dir">working_dir</label>
+                        <input type="text" id="working_dir" name="working_dir" value="<?= e(old('working_dir', $service['working_dir'] ?? '')) ?>" placeholder="/app">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="depends_on">depends_on (comma-separated)</label>
+                        <input type="text" id="depends_on" name="depends_on" value="<?= e(old('depends_on', $service['depends_on'] ?? '')) ?>" placeholder="db,redis">
+                    </div>
+                    <div class="form-group">
+                        <label for="network_mode">network_mode</label>
+                        <input type="text" id="network_mode" name="network_mode" value="<?= e(old('network_mode', $service['network_mode'] ?? '')) ?>" placeholder="bridge">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="build_context">build_context</label>
+                        <input type="text" id="build_context" name="build_context" value="<?= e(old('build_context', $service['build_context'] ?? '')) ?>" placeholder="./api">
+                        <p class="field-hint">Path to Dockerfile context — when set, Dockerfile content (below) will be generated</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dockerfile_content">Dockerfile content (when build_context is set)</label>
+                    <textarea id="dockerfile_content" name="dockerfile_content" rows="6" style="font-family:monospace;"><?= e(old('dockerfile_content', $service['dockerfile_content'] ?? '')) ?></textarea>
+                    <p class="field-hint">Leave empty for auto-generated FROM &lt;image&gt;</p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="healthcheck_cmd">healthcheck_cmd</label>
+                        <input type="text" id="healthcheck_cmd" name="healthcheck_cmd" value="<?= e(old('healthcheck_cmd', $service['healthcheck_cmd'] ?? '')) ?>" placeholder="curl -f http://localhost/ || exit 1">
+                    </div>
+                    <div class="form-group">
+                        <label for="healthcheck_interval">healthcheck_interval</label>
+                        <input type="text" id="healthcheck_interval" name="healthcheck_interval" value="<?= e(old('healthcheck_interval', $service['healthcheck_interval'] ?? '30s')) ?>" placeholder="30s">
+                    </div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <div class="card">
         <div class="page-head">
             <h2 class="card-title">Port mappings</h2>
             <button type="button" class="btn btn-secondary btn-sm" data-add-row="port" data-target="#ports-rows">+ Add port</button>

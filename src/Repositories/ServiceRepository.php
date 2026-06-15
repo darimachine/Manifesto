@@ -12,8 +12,8 @@ final class ServiceRepository
     public function find(int $id): ?Service
     {
         $stmt = Database::pdo()->prepare(
-            'SELECT id, project_id, name, image, restart_policy, notes, created_at, updated_at
-             FROM service WHERE id = :id LIMIT 1'
+            'SELECT s.*
+             FROM service s WHERE s.id = :id LIMIT 1'
         );
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
@@ -24,8 +24,7 @@ final class ServiceRepository
     public function findWithProject(int $id): ?array
     {
         $stmt = Database::pdo()->prepare(
-            'SELECT s.id, s.project_id, s.name, s.image, s.restart_policy, s.notes,
-                    s.created_at, s.updated_at, p.name AS project_name
+            'SELECT s.*, p.name AS project_name
              FROM service s
              INNER JOIN project p ON p.id = s.project_id
              WHERE s.id = :id LIMIT 1'
@@ -35,37 +34,77 @@ final class ServiceRepository
         return $row === false ? null : $row;
     }
 
-    /** @param array{project_id:int,name:string,image:string,restart_policy:string,notes:?string} $data */
+    /**
+     * @param array{
+     *   project_id?:int, name:string, image:string, restart_policy:string, notes:?string,
+     *   command:?string, working_dir:?string, depends_on:?string, build_context:?string,
+     *   dockerfile_content:?string, healthcheck_cmd:?string, healthcheck_interval:?string,
+     *   network_mode:?string
+     * } $data
+     */
     public function insert(array $data): int
     {
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO service (project_id, name, image, restart_policy, notes)
-             VALUES (:project_id, :name, :image, :restart_policy, :notes)'
+            'INSERT INTO service
+                (project_id, name, image, restart_policy, notes,
+                 command, working_dir, depends_on, build_context, dockerfile_content,
+                 healthcheck_cmd, healthcheck_interval, network_mode)
+             VALUES
+                (:project_id, :name, :image, :restart_policy, :notes,
+                 :command, :working_dir, :depends_on, :build_context, :dockerfile_content,
+                 :healthcheck_cmd, :healthcheck_interval, :network_mode)'
         );
         $stmt->execute([
-            'project_id'     => $data['project_id'],
-            'name'           => $data['name'],
-            'image'          => $data['image'],
-            'restart_policy' => $data['restart_policy'],
-            'notes'          => $data['notes'],
+            'project_id'          => $data['project_id'],
+            'name'                => $data['name'],
+            'image'               => $data['image'],
+            'restart_policy'      => $data['restart_policy'],
+            'notes'               => $data['notes'],
+            'command'             => $data['command'] ?? null,
+            'working_dir'         => $data['working_dir'] ?? null,
+            'depends_on'          => $data['depends_on'] ?? null,
+            'build_context'       => $data['build_context'] ?? null,
+            'dockerfile_content'  => $data['dockerfile_content'] ?? null,
+            'healthcheck_cmd'     => $data['healthcheck_cmd'] ?? null,
+            'healthcheck_interval'=> $data['healthcheck_interval'] ?? null,
+            'network_mode'        => $data['network_mode'] ?? null,
         ]);
         return (int) Database::pdo()->lastInsertId();
     }
 
-    /** @param array{name:string,image:string,restart_policy:string,notes:?string} $data */
+    /**
+     * @param array{
+     *   name:string, image:string, restart_policy:string, notes:?string,
+     *   command:?string, working_dir:?string, depends_on:?string, build_context:?string,
+     *   dockerfile_content:?string, healthcheck_cmd:?string, healthcheck_interval:?string,
+     *   network_mode:?string
+     * } $data
+     */
     public function update(int $id, array $data): bool
     {
         $stmt = Database::pdo()->prepare(
             'UPDATE service
-             SET name = :name, image = :image, restart_policy = :restart_policy, notes = :notes
+             SET name = :name, image = :image, restart_policy = :restart_policy, notes = :notes,
+                 command = :command, working_dir = :working_dir, depends_on = :depends_on,
+                 build_context = :build_context, dockerfile_content = :dockerfile_content,
+                 healthcheck_cmd = :healthcheck_cmd, healthcheck_interval = :healthcheck_interval,
+                 network_mode = :network_mode
              WHERE id = :id'
         );
         return $stmt->execute([
-            'id'             => $id,
-            'name'           => $data['name'],
-            'image'          => $data['image'],
-            'restart_policy' => $data['restart_policy'],
-            'notes'          => $data['notes'],
+            'id'                  => $id,
+            'name'                => $data['name'],
+            'image'               => $data['image'],
+            'restart_policy'      => $data['restart_policy'],
+            'notes'               => $data['notes'],
+            'command'             => $data['command'] ?? null,
+            'working_dir'         => $data['working_dir'] ?? null,
+            'depends_on'          => $data['depends_on'] ?? null,
+            'build_context'       => $data['build_context'] ?? null,
+            'dockerfile_content'  => $data['dockerfile_content'] ?? null,
+            'healthcheck_cmd'     => $data['healthcheck_cmd'] ?? null,
+            'healthcheck_interval'=> $data['healthcheck_interval'] ?? null,
+            'network_mode'        => $data['network_mode'] ?? null,
         ]);
     }
 

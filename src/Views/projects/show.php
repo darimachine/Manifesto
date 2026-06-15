@@ -18,6 +18,7 @@ $isAdmin   = ($currentUser['role'] ?? '') === 'admin';
         <?php endif; ?>
         <?php if ($latestVersion > 0): ?>
             <a class="btn btn-secondary" href="<?= url('/projects/' . $projectId . '/files') ?>">View files (v<?= $latestVersion ?>)</a>
+            <a class="btn btn-secondary" href="<?= url('/projects/' . $projectId . '/export') ?>">⬇ Export JSON</a>
         <?php endif; ?>
         <?php if ($isAdmin): ?>
             <a class="btn btn-secondary" href="<?= url('/projects/' . $projectId . '/edit') ?>">Edit</a>

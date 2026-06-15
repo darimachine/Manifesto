@@ -13,9 +13,6 @@ composer.lock
 !/storage/logs/.gitkeep
 !/storage/generated/.gitkeep
 
-# Claude Code local settings (PROGRESS.md се commit-ва, това НЕ)
-.claude/settings.local.json
-
 # OS / IDE
 Thumbs.db
 .DS_Store

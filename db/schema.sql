@@ -59,14 +59,22 @@ CREATE TABLE project (
 
 -- Service = one container in the compose project
 CREATE TABLE service (
-    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    project_id     INT UNSIGNED NOT NULL,
-    name           VARCHAR(128) NOT NULL,
-    image          VARCHAR(255) NOT NULL,
-    restart_policy ENUM('no','always','on-failure','unless-stopped') NOT NULL DEFAULT 'unless-stopped',
-    notes          TEXT NULL,
-    created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id                   INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    project_id           INT UNSIGNED NOT NULL,
+    name                 VARCHAR(128) NOT NULL,
+    image                VARCHAR(255) NOT NULL,
+    restart_policy       ENUM('no','always','on-failure','unless-stopped') NOT NULL DEFAULT 'unless-stopped',
+    notes                TEXT NULL,
+    command              VARCHAR(512) NULL,
+    working_dir          VARCHAR(255) NULL,
+    depends_on           VARCHAR(512) NULL COMMENT 'Comma-separated service names',
+    build_context        VARCHAR(255) NULL COMMENT 'Path to Dockerfile context, e.g. ./api',
+    dockerfile_content   LONGTEXT NULL COMMENT 'Inline Dockerfile content',
+    healthcheck_cmd      VARCHAR(512) NULL,
+    healthcheck_interval VARCHAR(32) NULL DEFAULT '30s',
+    network_mode         VARCHAR(64) NULL,
+    created_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_service_name_per_project (project_id, name),
     CONSTRAINT fk_service_project FOREIGN KEY (project_id)
         REFERENCES project (id) ON DELETE CASCADE
@@ -107,14 +115,19 @@ CREATE TABLE volume (
 
 -- Publicly reachable application attached to a service
 CREATE TABLE web_app (
-    id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    service_id INT UNSIGNED NOT NULL,
-    name       VARCHAR(128) NOT NULL,
-    public_url VARCHAR(255) NULL,
-    dns_name   VARCHAR(255) NULL,
-    notes      TEXT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id                  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    service_id          INT UNSIGNED NOT NULL,
+    name                VARCHAR(128) NOT NULL,
+    public_url          VARCHAR(255) NULL,
+    dns_name            VARCHAR(255) NULL,
+    notes               TEXT NULL,
+    status              ENUM('unknown','up','down','error') NOT NULL DEFAULT 'unknown',
+    last_status_change  TIMESTAMP NULL,
+    last_checked_at     TIMESTAMP NULL,
+    last_http_code      INT NULL,
+    last_duration_ms    INT NULL,
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_webapp_service (service_id),
     CONSTRAINT fk_webapp_service FOREIGN KEY (service_id)
         REFERENCES service (id) ON DELETE CASCADE
@@ -124,7 +137,7 @@ CREATE TABLE web_app (
 CREATE TABLE generated_file (
     id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     project_id     INT UNSIGNED NOT NULL,
-    file_type      ENUM('docker-compose','env','emmet') NOT NULL,
+    file_type      ENUM('docker-compose','env','emmet','dockerfile') NOT NULL,
     version_number INT UNSIGNED NOT NULL DEFAULT 1,
     content        LONGTEXT NOT NULL,
     created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
