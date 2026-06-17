@@ -89,7 +89,7 @@ Manifesto/
 ├── config/              config.php, routes.php
 ├── db/                  schema.sql, seed.sql
 ├── storage/             логове и кеш на генерираните файлове
-└── docs/                ръководство и допълнителна документация
+└── docs/                допълнителна документация
 ```
 
 ## Принципи

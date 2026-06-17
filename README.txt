@@ -32,10 +32,8 @@ CONTENTS OF THIS ARCHIVE
     seed.sql            Demo data: admin/viewer + 2 demo projects
 
   docs/
-    USER_GUIDE.md       Step-by-step usage guide with screenshots
     DEFENSE_DOCUMENTATION.md   Project documentation (per FMI template)
     PROMPTS.md          Notable prompts log (per lecturer requirement)
-    screenshots/        UI screenshots referenced from USER_GUIDE.md
 
   storage/              Writable runtime directories
     logs/               Error logs (.gitkeep present)

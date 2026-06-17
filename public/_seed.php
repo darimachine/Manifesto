@@ -1,20 +1,5 @@
 <?php
-/**
- * One-shot seed script.
- *
- * Изпълнява db/schema.sql и db/seed.sql срещу базата, която app-ът
- * използва (чете credentials от ENV променливите на контейнера).
- *
- * !!! ИЗТРИЙ ТОЗИ ФАЙЛ СЛЕД УПОТРЕБА !!!
- *
- * Употреба:
- *   https://<host>/_seed.php?token=<SEED_TOKEN>
- */
-
-// ─── ПРОМЕНИ ТОВА ──────────────────────────────────────────────────
-// Сложи произволен дълъг низ. Без правилен token URL-ът връща 403.
 $EXPECTED_TOKEN = 'serhi-seed';
-// ───────────────────────────────────────────────────────────────────
 
 if (($_GET['token'] ?? '') !== $EXPECTED_TOKEN) {
     http_response_code(403);
@@ -71,6 +56,12 @@ foreach (['schema.sql', 'seed.sql'] as $file) {
         echo "SKIP: {$file} е празен\n";
         continue;
     }
+
+    // schema.sql/seed.sql имат hardcoded `CREATE DATABASE manifesto` и
+    // `USE manifesto`. На HSS user-а няма права върху име 'manifesto' —
+    // вече сме закачени за {$db} през DSN-а, така че тези редове не ни трябват.
+    $sql = preg_replace('/^\s*CREATE\s+DATABASE[^;]*;/im', '', $sql);
+    $sql = preg_replace('/^\s*USE\s+[^;]*;/im',           '', $sql);
 
     echo "Running {$file} ... ";
 

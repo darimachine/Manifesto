@@ -2,14 +2,8 @@
 
 declare(strict_types=1);
 
-/**
- * Manifesto — front controller. Everything goes through here.
- */
-
 define('MANIFESTO_ROOT', dirname(__DIR__));
 
-// --- Autoload: composer if present, otherwise built-in PSR-4 fallback
-// (keeps the project runnable with zero dependencies / no internet).
 if (is_file(MANIFESTO_ROOT . '/vendor/autoload.php')) {
     require MANIFESTO_ROOT . '/vendor/autoload.php';
 } else {
@@ -32,12 +26,11 @@ use Manifesto\Core\Response;
 use Manifesto\Core\Router;
 use Manifesto\Core\Session;
 
-// --- Config (single source: .env / environment)
+
 EnvLoader::load(MANIFESTO_ROOT . '/.env');
 $config = require MANIFESTO_ROOT . '/config/config.php';
 Database::configure($config['db']);
 
-// --- Error handling: log always, display only in debug mode
 ini_set('log_errors', '1');
 ini_set('error_log', $config['paths']['logs'] . '/error.log');
 ini_set('display_errors', $config['app']['debug'] ? '1' : '0');
@@ -53,15 +46,15 @@ set_exception_handler(static function (Throwable $e) use ($config): void {
     Response::abort(500);
 });
 
-// --- Session + request
+
 Session::start();
 $request = Request::capture();
 
-// --- CSRF: verified centrally for EVERY POST request
+
 if ($request->isPost() && !Csrf::verify($request->input('_csrf_token'))) {
     Response::abort(419, 'Invalid or expired CSRF token.');
 }
 
-// --- Route
+
 $router = new Router(require MANIFESTO_ROOT . '/config/routes.php');
 $router->dispatch($request);

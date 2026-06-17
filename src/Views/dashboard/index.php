@@ -18,7 +18,6 @@
             <p>Define your infrastructure here, then click <strong>Generate files</strong> to produce a valid <code>docker-compose.yml</code>, <code>.env</code> and Emmet text export.</p>
             <p style="margin-top:1rem;">
                 <a href="<?= url('/docker-hosts/create') ?>" class="btn btn-primary btn-sm">Create your first Docker Host →</a>
-                <a href="<?= url('/projects/import') ?>" class="btn btn-secondary btn-sm">⬆ Or import from JSON</a>
             </p>
         </div>
     </details>

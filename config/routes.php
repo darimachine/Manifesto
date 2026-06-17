@@ -33,9 +33,6 @@ return [
     ['GET',  '/projects',             ProjectController::class, 'index',  'auth'],
     ['GET',  '/projects/create',      ProjectController::class, 'create', 'admin'],
     ['POST', '/projects',             ProjectController::class, 'store',  'admin'],
-    // JSON import — must be BEFORE /projects/{id} to avoid routing "import" as an ID
-    ['GET',  '/projects/import',      GenerationController::class, 'importForm', 'admin'],
-    ['POST', '/projects/import',      GenerationController::class, 'importJson', 'admin'],
     ['GET',  '/projects/{id}',        ProjectController::class, 'show',   'auth'],
     ['GET',  '/projects/{id}/edit',   ProjectController::class, 'edit',   'admin'],
     ['POST', '/projects/{id}',        ProjectController::class, 'update', 'admin'],
@@ -62,6 +59,5 @@ return [
     ['POST', '/projects/{id}/generate',       GenerationController::class, 'generate', 'admin'],
     ['GET',  '/projects/{id}/files',          GenerationController::class, 'files',    'auth'],
     ['GET',  '/projects/{id}/emmet',          GenerationController::class, 'emmet',    'auth'],
-    ['GET',  '/projects/{id}/export',         GenerationController::class, 'exportJson', 'auth'],
     ['GET',  '/files/{id}/download',          GenerationController::class, 'download', 'auth'],
 ];

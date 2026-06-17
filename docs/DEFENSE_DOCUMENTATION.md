@@ -31,8 +31,7 @@
 5. [Функционалности](#5-функционалности)
 6. [Сигурност](#6-сигурност)
 7. [Инструкции за подкарване](#7-инструкции-за-подкарване)
-8. [Ръководство за ползване](#8-ръководство-за-ползване)
-9. [Заключение](#9-заключение)
+8. [Заключение](#8-заключение)
 
 ---
 
@@ -572,41 +571,13 @@ DB_EXPOSED_PORT=33060
 
 ---
 
-## 8. Ръководство за ползване
-
-Подробно ръководство със всички flows и екранни снимки — виж [`USER_GUIDE.md`](USER_GUIDE.md).
-
-Кратко резюме на главните flows:
-
-### 8.1 Login
-
-`/login` → въвеждане на admin/admin123 → dashboard.
-
-### 8.2 Управление на инфраструктура
-
-1. Създай Docker host (`/docker-hosts/create`)
-2. Създай Project под този host (`/projects/create`)
-3. Добави Services (`/projects/{id}/services/create`) с inline ports/envs/volumes
-4. Добави Web Apps на service (`/services/{id}/webapps/create`)
-
-### 8.3 Генериране
-
-От страница на проект → бутон **„Generate files"** → системата произвежда трите файла → redirect към `/projects/{id}/files` за preview и download.
-
-### 8.4 Разлика admin vs viewer
-
-- **Admin** — пълни CRUD права, бутоните Edit/Delete/Generate видими
-- **Viewer** — read-only, Edit/Delete/Generate бутоните скрити; директен POST към protected endpoint връща 403
-
----
-
-## 9. Заключение
+## 8. Заключение
 
 Проектът Manifesto демонстрира пълна реализация на CRUD уеб приложение на vanilla PHP без framework, с интегрирано генериране на инфраструктурни конфигурационни файлове. Архитектурата е чиста и расшируема — добавянето на нов entity или нов тип генериран файл изисква минимални промени.
 
 Проектът покрива всички задължителни изисквания (FR-01 до FR-15) и спазва нефункционалните изисквания за сигурност, портативност и offline работа.
 
-### 9.1 Възможности за разширение
+### 8.1 Възможности за разширение
 
 - Bidirectional Emmet parser (вход → дърво)
 - Импорт от съществуващ `docker-compose.yml`
@@ -614,7 +585,7 @@ DB_EXPOSED_PORT=33060
 - Public REST API
 - Multi-tenancy (организации, проекти на различни потребители)
 
-### 9.2 Препоръки за production deployment
+### 8.2 Препоръки за production deployment
 
 - Сменете default credentials на admin/viewer
 - Поставете `APP_DEBUG=0` в `.env`
