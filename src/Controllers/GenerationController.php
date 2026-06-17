@@ -29,14 +29,13 @@ final class GenerationController
         $hosts          = new DockerHostRepository();
         $services       = new ServiceRepository();
         $this->files    = new GeneratedFileRepository();
-        $this->compose  = new \Manifesto\Services\DockerComposeGenerator($this->projects, $children);
+        $this->compose  = new \Manifesto\Services\DockerComposeGenerator($this->projects, $children, $services);
         $this->envGen   = new \Manifesto\Services\EnvFileGenerator($this->projects, $children);
         $this->emmet    = new \Manifesto\Services\EmmetExporter($hosts, $this->projects, $services, $children);
     }
 
     /**
      * POST /projects/{id}/generate
-     * Runs all three generators and saves a new versioned set.
      */
     public function generate(Request $request, string $id): void
     {
